@@ -41,8 +41,7 @@ public class OrderRepository {
     }
 
     public List<Order> getAll() {
-        final String SQL =
-                "SELECT id, status, requester_id, bidder_id, requester_address, bidder_address FROM public.order";
+        final String SQL = "SELECT id, status, requester_id, bidder_id, requester_address, bidder_address FROM public.order";
         List<Order> orders = new ArrayList<>();
         try (PreparedStatement preparedStatement = databaseConnection.getConnection().prepareStatement(SQL)) {
             ResultSet rs = preparedStatement.executeQuery();
@@ -53,16 +52,7 @@ public class OrderRepository {
                 Owner bidder = this.ownerRepository.get(rs.getLong("bidder_id"));
                 String requesterAddress = rs.getString("requester_address");
                 String bidderAddress = rs.getString("bidder_address");
-                orders.add(
-                    new Order(
-                        id,
-                        status,
-                        requester,
-                        bidder,
-                        requesterAddress,
-                        bidderAddress
-                    )
-                );
+                orders.add(new Order(id, status, requester, bidder, requesterAddress, bidderAddress));
             }
         } catch (Exception ex) {
             System.out.println(ex.getMessage());
@@ -77,14 +67,7 @@ public class OrderRepository {
             preparedStatement.setLong(1, id);
             ResultSet rs = preparedStatement.executeQuery();
             if (rs.next()) {
-                return new Order(
-                    rs.getLong("id"),
-                    rs.getString("status"),
-                    this.ownerRepository.get(rs.getLong("requester_id")),
-                    this.ownerRepository.get(rs.getLong("bidder_id")),
-                    rs.getString("requester_address"),
-                    rs.getString("bidder_address")
-                );
+                return new Order(rs.getLong("id"), rs.getString("status"), this.ownerRepository.get(rs.getLong("requester_id")), this.ownerRepository.get(rs.getLong("bidder_id")), rs.getString("requester_address"), rs.getString("bidder_address"));
             } else {
                 return null;
             }
@@ -96,6 +79,19 @@ public class OrderRepository {
 
     public List<OrderDetail> getOrderDetails(long orderId) {
         // BU METHODU 2. GOREV ICIN DOLDURUNUZ
+        final String SQL = "SELECT * FROM public.order_detail where order_id = ?;";
+        List<OrderDetail> orderDetails = new ArrayList<>();
+        try (PreparedStatement preparedStatement = databaseConnection.getConnection().prepareStatement(SQL)) {
+            preparedStatement.setLong(1, orderId);
+            ResultSet rs = preparedStatement.executeQuery();
+            while (rs.next()) {
+                orderDetails.add(new OrderDetail(rs.getLong("id"), rs.getString("status"), rs.getString("type"), this.orderRepository.get(rs.getLong("order_id")), this.productRepository.get(rs.getLong("product_id")), rs.getFloat("amount"), rs.getString("amount_type")));
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            throw new RuntimeException(ex.getMessage());
+        }
+        return orderDetails;
     }
 
     public void save(Order order) throws RuntimeException {

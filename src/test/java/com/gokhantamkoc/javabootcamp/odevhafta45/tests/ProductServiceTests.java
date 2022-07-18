@@ -20,16 +20,12 @@ public class ProductServiceTests {
 
     @Before
     public void setup() {
-        this.productService = new ProductService(
-                new ProductRepository(new DatabaseConnection())
-        );
+        this.productService = new ProductService(new ProductRepository(new DatabaseConnection()));
     }
 
     @Test
     public void CreateProductTest() {
-        Product product = new Product(
-        3L, "Test Product 1", "Test Product 1"
-        );
+        Product product = new Product(3L, "Test Product 1", "Test Product 1");
 
         productService.createProduct(product);
         boolean actualResult = productService.deleteProduct(product.getId());
@@ -40,9 +36,7 @@ public class ProductServiceTests {
     public void UpdateProductTest() {
         Product existingProduct = productService.getProduct(1L);
         assertThat(existingProduct).isNotEqualTo(null);
-        Product updatedProduct = new Product(
-        1L, "Test Product 1", "Test Product 1"
-        );
+        Product updatedProduct = new Product(1L, "Test Product 1", "Test Product 1");
         productService.updateProduct(updatedProduct);
         Product productAfterUpdate = productService.getProduct(1L);
         assertThat(productAfterUpdate.getId()).isEqualTo(1L);
